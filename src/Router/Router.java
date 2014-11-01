@@ -29,11 +29,11 @@ public class Router {
 	 * Default constructor
 	 * @param st defines stride length: values 1-3 inclusive
 	 ***************************************************************/
-	public Router () {
+	public Router (int st) {
 		
 		/** Later to take 2 or 3 as params*/
 		this.trie = new Trie(st);
-		trie.populate(stride_len);
+		trie.populate();
 	}
 	
 	/****************************************************************
