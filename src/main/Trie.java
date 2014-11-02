@@ -1,5 +1,7 @@
 package main;
 
+import java.util.Vector;
+
 /********************************************************************
  * Trie.java
  *
@@ -10,58 +12,101 @@ package main;
  *******************************************************************/
 public class Trie {
 
-	/** Maximum number of children per parent node */
-	private int stride_len;
+	private Node root;
 	
-	/****************************************************************
-	 * Adds a node to this Trie
-	 * Do we need to make a node class? -probably not.
-	 * 
-	 * We can determine parent node of a given child node of length
-	 * n from the most significant n-1 bits of the child.
-	 * 
-	 * 
-	 * @param nd represents the node to add 
-	 ***************************************************************/
-	public boolean add(int nd){
-		return true;
-	}
-	
-	/****************************************************************
-	 * Removes a node from this Trie
-	 * Will we need this ? 
-	 ***************************************************************/
-	public boolean remove(){
-		return true;
-	}
-	
-	/****************************************************************
-	 * No clue how this one is going to work, or if it is needed.
-	 * @return ??
-	 ***************************************************************/
-	public int find(){
-		return 0;
-	}
-	
-	/****************************************************************
-	 * populate main trie by reading input file
-	 * calls add() repeatedly for each entry in the grand list
-	 * 
-	 * -I am actually still not sure of the actual structure of the
-	 * trie. Research and clarification are my next step.
-	 ***************************************************************/
-	public void populate () {
-		
-	}
+	/** Difference of the number of bits between levels. */
+	private int strideLen;
 	
 	/****************************************************************
 	 * Default constructor 
-	 * @param st defines stride length
+	 * 
+	 * @param sl defines stride length
 	 ***************************************************************/
-	public Trie(int st){
+	public Trie(int sl){
 		
-		this.stride_len = st;
-		populate();
+		root = new Node(-1, -1, null, 0);
 		
+		strideLen = sl;
+	}
+	
+	/****************************************************************
+	 * Adds a node to this Trie
+	 * 
+	 * @param nd represents the node to add 
+	 ***************************************************************/
+	public void add(int prefix, int prefixLength, int pathLength, 
+			String nextHop){
+		Node node = new Node(prefix, pathLength, nextHop, prefixLength);
+	}
+	
+	private void insertPrefix(Node node) {
+		insertPrefix(node, root);
+	}
+	
+	private void insertPrefix(Node toInsert, Node current) {
+		
+		if (current.data == toInsert.data) {
+			// TODO: End case
+		} else {
+			
+			Node next = current.childContainsPrefix(toInsert);
+			
+			/* If the current node does not have the child needed, create it */
+			if (next == null) {
+				int undesiredLength = (toInsert.level - (current.level + 1));
+				
+				int data = toInsert.data >>> undesiredLength;
+				
+				next = new Node(data, -1, null, current.level + 1);
+				
+				current.addChild(next);
+			}
+			
+			insertPrefix(toInsert, next);
+			
+		}
+	}
+	
+	private class Node {
+		
+		Vector<Node> children;
+		
+		int data;
+		
+		int pathLength;
+		
+		String nextHop;
+		
+		int level;
+		
+		public Node(int data, int pathLength, String nextHop, int level) {
+			this.data = data;
+			this.pathLength = pathLength;
+			this.nextHop = nextHop;
+			this.level = level;
+			
+			children = new Vector<Node>();
+		}
+		
+		public void addChild(Node child) {
+			children.add(child);
+		}
+		
+		public Node childContainsPrefix(Node prefix) {
+			
+			int undesiredLength = prefix.level - (level + 1);
+			
+			int beginningPrefix = prefix.data >>> undesiredLength;
+			
+			
+			for (Node child : children) {
+				
+				if (child.data == beginningPrefix) {
+					return child;
+				}
+			}
+			
+			return null;
+		}
 	}
 }
