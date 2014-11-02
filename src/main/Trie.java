@@ -42,6 +42,39 @@ public class Trie {
 		insertPrefix(node);
 	}
 	
+	public String lookUp(String ipAddr) {
+		
+		String[] ipArr = ipAddr.split("\\.");
+		
+		if (ipArr.length != 4) return null;
+		
+		int data = (Integer.parseInt(ipArr[0]) & 0xFF) << 24;
+		data &= (Integer.parseInt(ipArr[1]) & 0xFF) << 16;
+		data &= (Integer.parseInt(ipArr[2]) & 0xFF) << 8;
+		data &= (Integer.parseInt(ipArr[3]) & 0xFF);
+		
+		Node searchingFor = new Node(data, 8 * 4);
+		
+		return lookUp(searchingFor, root);
+	}
+	
+	private String lookUp(Node searchingFor, Node current) {
+		
+		/* End case */
+		if (current.children == null) {
+			return current.nextHop;
+		} else {	
+			
+			Node next = current.childContainsPrefix(searchingFor);
+			
+			if (next == null) {
+				return null;
+			}
+			
+			return lookUp(searchingFor, next);
+		}
+	}
+	
 	private void insertPrefix(Node node) {
 		insertPrefix(node, root);
 	}
