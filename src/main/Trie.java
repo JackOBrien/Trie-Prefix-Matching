@@ -8,7 +8,7 @@ import java.util.Vector;
  * @author Jack O'Brien
  * @author Megan Maher
  * @author Tyler McCarthy
- * @version Oct 31, 2014
+ * @version Nov 2, 2014
  *******************************************************************/
 public class Trie {
 
@@ -24,7 +24,7 @@ public class Trie {
 	 ***************************************************************/
 	public Trie(int sl){
 		
-		root = new Node(-1, -1, null, 0);
+		root = new Node(-1, 0);
 		
 		strideLen = sl;
 	}
@@ -36,7 +36,10 @@ public class Trie {
 	 ***************************************************************/
 	public void add(int prefix, int prefixLength, int pathLength, 
 			String nextHop){
-		Node node = new Node(prefix, pathLength, nextHop, prefixLength);
+		
+		Node node = new Node(prefix, prefixLength);
+		
+		insertPrefix(node);
 	}
 	
 	private void insertPrefix(Node node) {
@@ -46,7 +49,8 @@ public class Trie {
 	private void insertPrefix(Node toInsert, Node current) {
 		
 		if (current.data == toInsert.data) {
-			// TODO: End case
+			current.nextHop = toInsert.nextHop;
+			current.pathLength = toInsert.pathLength;
 		} else {
 			
 			Node next = current.childContainsPrefix(toInsert);
@@ -57,13 +61,12 @@ public class Trie {
 				
 				int data = toInsert.data >>> undesiredLength;
 				
-				next = new Node(data, -1, null, current.level + 1);
+				next = new Node(data, current.level + 1);
 				
 				current.addChild(next);
 			}
 			
 			insertPrefix(toInsert, next);
-			
 		}
 	}
 	
@@ -79,11 +82,12 @@ public class Trie {
 		
 		int level;
 		
-		public Node(int data, int pathLength, String nextHop, int level) {
+		public Node(int data,int level) {
 			this.data = data;
-			this.pathLength = pathLength;
-			this.nextHop = nextHop;
 			this.level = level;
+			
+			pathLength = -1;
+			nextHop = null;
 			
 			children = new Vector<Node>();
 		}
