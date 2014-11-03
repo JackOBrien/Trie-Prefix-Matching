@@ -3,8 +3,6 @@ package main;
 import java.util.Scanner;
 import java.util.Vector;
 
-import com.sun.xml.internal.fastinfoset.util.PrefixArray;
-
 /********************************************************************
  * Trie.java
  *
@@ -48,8 +46,6 @@ public class Trie {
 		
 		int data = convertIPtoInt(ipAddr, ipAddressLength);
 		
-		if (data < 0) return null;
-		
 		Node searchingFor = new Node(data, ipAddressLength);
 		
 		return lookUp(searchingFor, root);
@@ -57,8 +53,6 @@ public class Trie {
 	
 	private int convertIPtoInt(String ipAddr, int prefixLength) {
 		String[] ipArr = ipAddr.split("\\.");
-		
-		if (ipArr.length != 4) return -1;
 		
 		int data = (Integer.parseInt(ipArr[0]) & 0xFF) << 24;
 		data |= (Integer.parseInt(ipArr[1]) & 0xFF) << 16;
@@ -77,9 +71,26 @@ public class Trie {
 			
 			Node next = current.childContainsPrefix(searchingFor);
 			
+			/* If the current node has a next hop IP */
+			if (current.nextHop != null) {
+				
+				if (next == null) {
+					return current.nextHop;
+				}
+				
+				String result = lookUp(searchingFor, next);
+				
+				if (result == null) {
+					return current.nextHop;
+				} else {
+					return result;
+				}
+			}
+			
+			/* If the current node contains no children with the next step */
 			if (next == null) {
 				return null;
-			}
+			}		
 			
 			return lookUp(searchingFor, next);
 		}
@@ -128,8 +139,8 @@ public class Trie {
 			
 			try {
 		
-				if (input.startsWith("add: ")) {
-					input = input.substring(5);
+				if (input.startsWith("add ")) {
+					input = input.substring(4);
 
 					String[] arr = input.split(" ");
 
@@ -143,17 +154,22 @@ public class Trie {
 					String nextHop = arr[2];
 
 					t.add(prefix, prefixLength, pathLength, nextHop);
-				} else if(input.startsWith("lookup: ")) {
-					input = input.substring(8);
+					
+					System.out.println("---\tAdded to Trie");
+				} else if(input.startsWith("lookup ")) {
+					input = input.substring(7);
 					String result = t.lookUp(input);
 					
 					if (result == null) {
 						result = "No Match";
 					}
 							
-					System.out.println("\t" + result);
+					System.out.println("---\t" + result);
+				} else {
+					System.err.println("~ Invalid Command: " + input + " ~");
 				}
 			} catch (Exception e) {
+				System.out.println();
 				e.printStackTrace();
 			}
 		}
