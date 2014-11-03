@@ -6,9 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Scanner;
 
-import javax.sound.midi.SysexMessage;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 /********************************************************************
  * Router.java
  *
@@ -148,7 +145,14 @@ public class Router {
 			long elapsed = System.currentTimeMillis() - start;
 			
 			System.out.println("Done");
-			System.out.println("Elapsed time: " + elapsed + "ms\n");
+			System.out.println("Elapsed time: " + elapsed + "ms");
+			
+			int memUsage = (int) (Runtime.getRuntime().totalMemory() - 
+					Runtime.getRuntime().freeMemory());
+			memUsage /= 1048576;
+			
+			System.out.println("Memory usage: " + memUsage + "Mb");
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(0);
