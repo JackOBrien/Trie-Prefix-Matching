@@ -48,7 +48,11 @@ public class Trie {
 		
 		Node searchingFor = new Node(data, ipAddressLength);
 		
-		return lookUp(searchingFor, root);
+		String result = lookUp(searchingFor, root);
+		
+		if (result == null) result = "No Match";
+		
+		return result;
 	}
 	
 	private int convertIPtoInt(String ipAddr, int prefixLength) {
@@ -159,10 +163,6 @@ public class Trie {
 				} else if(input.startsWith("lookup ")) {
 					input = input.substring(7);
 					String result = t.lookUp(input);
-					
-					if (result == null) {
-						result = "No Match";
-					}
 							
 					System.out.println("---\t" + result);
 				} else {
