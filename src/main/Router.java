@@ -16,17 +16,14 @@ import java.util.Scanner;
  *******************************************************************/
 public class Router {
 	
-	// TODO: Make Dynamic for second release
-	private final int STRIDE_LENGTH = 3; 
-	
 	private BufferedReader routesReader;
 	
 	private BufferedReader ipListReader;
 	
 	private Trie trie;
 	
-	public Router() {
-		trie = new Trie(STRIDE_LENGTH);
+	public Router(int strideLength) {
+		trie = new Trie(strideLength);
 	}
 
 	public void setRoutesFile(String path) throws FileNotFoundException {
@@ -107,13 +104,15 @@ public class Router {
 	}
 	
 	public static void main(String[] args) {
-		//TODO: Take stride length, pass to constructor
+		Scanner scan = new Scanner(System.in);		
 		
-		Router router = new Router();
+		System.out.print("Enter stride length: ");
+		int strideLength = Integer.parseInt(scan.nextLine());
 		
-		Scanner scan = new Scanner(System.in);
+		Router router = new Router(strideLength);
 		
-		System.out.println("Input router file path:");
+		
+		System.out.println("\nInput router file path:");
 		System.out.print("\t> ");
 		
 		String fileName = "";
