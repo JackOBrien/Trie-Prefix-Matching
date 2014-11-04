@@ -18,7 +18,7 @@ public class Trie {
 	
 	/** Difference of the number of bits between levels. 
 	 * TODO: Unused for release 1 */
-	private int strideLen;
+	private int strideLength;
 	
 	/****************************************************************
 	 * Default constructor 
@@ -29,7 +29,7 @@ public class Trie {
 		
 		root = new Node(-1, 0);
 		
-		this.strideLen = strideLength;
+		this.strideLength = strideLength;
 	}
 	
 	/****************************************************************
@@ -142,11 +142,12 @@ public class Trie {
 			
 			/* If the current node does not have the child needed, create it */
 			if (next == null) {
-				int undesiredLength = (toInsert.level - (current.level + 1));
+				int undesiredLength = (toInsert.level - 
+						(current.level + strideLength));
 				
 				int data = toInsert.data >>> undesiredLength;
 				
-				next = new Node(data, current.level + 1);
+				next = new Node(data, current.level + strideLength);
 				
 				current.addChild(next);
 			}
