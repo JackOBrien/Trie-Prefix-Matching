@@ -17,7 +17,7 @@ import java.util.Scanner;
 public class Router {
 	
 	// TODO: Make Dynamic for second release
-	private final int STRIDE_LENGTH = 2; 
+	private final int STRIDE_LENGTH = 3; 
 	
 	private BufferedReader routesReader;
 	
@@ -84,7 +84,7 @@ public class Router {
 			String prefix = prefixArr[0];
 			int prefixLength = Integer.parseInt(prefixArr[1]);
 			
-			trie.add(prefix, prefixLength, shortestPath, shortestHop);
+			trie.add(prefix, prefixLength, shortestHop);
 		}
 		
 		routesReader.close();

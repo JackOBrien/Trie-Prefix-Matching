@@ -40,14 +40,13 @@ public class Trie {
 	 * @param pathLength the length of the AS path.
 	 * @param nextHop the IP address of the next hop.
 	 ***************************************************************/
-	public void add(String prefix, int prefixLength, int pathLength, 
-			String nextHop){
+	public void add(String prefix, int prefixLength, String nextHop){
 		
-		int data = convertIPtoInt(prefix, prefixLength);
+		int prefBits = convertIPtoInt(prefix, prefixLength);
 		
-		Node node = new Node(data, pathLength, nextHop, prefixLength);
+		Prefix p = new Prefix(prefBits, prefixLength, nextHop);
 		
-		insertPrefix(node);
+		insertPrefix(p);
 	}
 	
 	/****************************************************************
@@ -64,9 +63,7 @@ public class Trie {
 		
 		int data = convertIPtoInt(ipAddr, ipAddressLength);
 		
-		Node searchingFor = new Node(data, ipAddressLength);
-		
-		String result = lookUp(searchingFor, root);
+		String result = lookUp(new Prefix(data, ipAddressLength, null), root);
 		
 		if (result == null) result = "No Match";
 		
@@ -78,30 +75,30 @@ public class Trie {
 	 * associated with it. Returns "No Match" if there is no 
 	 * matching prefix.
 	 * 
-	 * @param searchingFor the node representing what is being searched for.
+	 * @param ipBits representation of the IPv4 address to lookup
 	 * @param current the node currently being compared.
 	 * @return the next hop associated with the given IP if any.
 	 ***************************************************************/
-	private String lookUp(Node searchingFor, Node current) {
+	private String lookUp(Prefix toLookup, Node current) {
 		
 		/* End case */
 		if (current.children.isEmpty()) {
-			return current.nextHop;
+			return current.getBestHop(toLookup.bits);
 		} else {	
 			
-			Node next = current.childContainsPrefix(searchingFor);
+			Node next = current.getNextStep(toLookup);
 			
 			/* If the current node has a next hop IP */
-			if (current.nextHop != null) {
+			if (current.getBestHop(toLookup.bits) != null) {
 				
 				if (next == null) {
-					return current.nextHop;
+					return current.getBestHop(toLookup.bits);
 				}
 				
-				String result = lookUp(searchingFor, next);
+				String result = lookUp(toLookup, next);
 				
 				if (result == null) {
-					return current.nextHop;
+					return current.getBestHop(toLookup.bits);
 				} else {
 					return result;
 				}
@@ -112,40 +109,46 @@ public class Trie {
 				return null;
 			}		
 			
-			return lookUp(searchingFor, next);
+			return lookUp(toLookup, next);
 		}
 	}
 	
 	/****************************************************************
 	 * Inserts the given prefix into the Trie.
 	 * 
-	 * @param node the node representing what's to be added.
+	 * @param prefix the Prefix object representing what's to be added.
 	 ***************************************************************/
-	private void insertPrefix(Node node) {
-		insertPrefix(node, root);
+	private void insertPrefix(Prefix prefix) {
+		insertPrefix(prefix, root);
 	}
 	
 	/****************************************************************
 	 * Inserts the given prefix into the Trie.
 	 * 
-	 * @param node the node representing what's to be added.
-	 * @param current the node current;y being compared.
+	 * @param prefix the Prefix object representing what's to be added.
+	 * @param current the node currently being compared.
 	 ***************************************************************/
-	private void insertPrefix(Node toInsert, Node current) {
+	private void insertPrefix(Prefix toInsert, Node current) {
 		
-		if (current.data == toInsert.data) {
-			current.nextHop = toInsert.nextHop;
-			current.pathLength = toInsert.pathLength;
+		int len = toInsert.length;
+		
+		while (len % strideLength != 0) {
+			len ++;
+		}
+		
+		int desiredData = toInsert.bits << (len - toInsert.length);
+		
+		if (current.data == desiredData && 
+				current.level * strideLength == len) {
+			current.addPrefix(toInsert);
 		} else {
 			
-			Node next = current.childContainsPrefix(toInsert);
+			Node next = current.getNextStep(toInsert);
 			
 			/* If the current node does not have the child needed, create it */
 			if (next == null) {
-				int undesiredLength = (toInsert.level - 
-						(current.level + strideLength));
 				
-				int data = toInsert.data >>> undesiredLength;
+				int data = shiftPrefix(toInsert, current.level);
 				
 				next = new Node(data, current.level + 1);
 				
@@ -175,14 +178,28 @@ public class Trie {
 		return data >>> (32 - prefixLength);
 	}
 
+	private int shiftPrefix(Prefix prefix, int level) {
+		int undesiredLength = prefix.length - ((level + 1) * strideLength);
+		int beginningPrefix;
+		
+		if (undesiredLength < 0) {
+			beginningPrefix = prefix.bits << (-1) * undesiredLength;
+		} else {
+			beginningPrefix = prefix.bits >>> undesiredLength;
+		}
+		
+		return beginningPrefix; 
+	}
+	
+	
 	public static void main(String[] args) {
-		Trie t = new Trie(1);
+		Trie t = new Trie(2);
 		
 		Scanner scan = new Scanner(System.in);
 		
 		System.out.println("Please use commands: " + 
-				"add: <prefix> <pathLength> <nextHop>\n" + 
-				"                     lookup: <IP address>");
+				"add <prefix> <pathLength> <nextHop>\n" + 
+				"                     lookup <IP address>");
 		
 		while(true) {
 			System.out.print("> ");
@@ -201,17 +218,22 @@ public class Trie {
 					prefix = prefixArr[0];
 					
 					int prefixLength = Integer.parseInt(prefixArr[1]);
-					int pathLength = Integer.parseInt(arr[1]);
-					String nextHop = arr[2];
+					String nextHop = arr[1];
 
-					t.add(prefix, prefixLength, pathLength, nextHop);
+					t.add(prefix, prefixLength, nextHop);
 					
 					System.out.println("---\tAdded to Trie");
+				
 				} else if(input.startsWith("lookup ")) {
 					input = input.substring(7);
 					String result = t.lookUp(input);
 							
 					System.out.println("---\t" + result);
+				
+				} else if(input.startsWith("exit")) {
+					scan.close();
+					System.exit(0);
+				
 				} else {
 					System.err.println("~ Invalid Command: " + input + " ~");
 				}
@@ -224,45 +246,45 @@ public class Trie {
 	
 	private class Node {
 		
+		Vector<Prefix> prefixes;
 		Vector<Node> children;
 		
 		int data;
-		
-		int pathLength;
-		
-		String nextHop;
-		
 		int level;
-		
-		public Node(int data, int pathLength, String nextHop, int level) {
-			this.data = data;
-			this.pathLength = pathLength;
-			this.nextHop = nextHop;
-			this.level = level;
-					
-			children = new Vector<Node>();
-		}
 		
 		public Node(int data,int level) {
 			this.data = data;
 			this.level = level;
 			
-			pathLength = -1;
-			nextHop = null;
-			
+			prefixes = new Vector<Prefix>();
 			children = new Vector<Node>();
+		}
+		
+		public void addPrefix(Prefix prefix) {
+			prefixes.add(prefix);
 		}
 		
 		public void addChild(Node child) {
 			children.add(child);
 		}
 		
-		public Node childContainsPrefix(Node prefix) {
+		public String getBestHop(int ipBits) {			
+			Prefix longestPrefix = new Prefix(-1, 0, null);
 			
-			int undesiredLength = prefix.level - (level * strideLength);
+			for (Prefix p : prefixes) {
+				if (p.length > longestPrefix.length) {
+					if (p.matches(ipBits)) {
+						longestPrefix = p;
+					}
+				}
+			}
 			
-			int beginningPrefix = prefix.data >>> undesiredLength;
+			return longestPrefix.nextHop;
+		}
+		
+		public Node getNextStep(Prefix prefix) {
 			
+			int beginningPrefix = shiftPrefix(prefix, level);
 			
 			for (Node child : children) {
 				
@@ -272,6 +294,24 @@ public class Trie {
 			}
 			
 			return null;
+		}
+	}
+	
+	private class Prefix {
+		int bits;
+		int length;
+		String nextHop;
+		
+		public Prefix(int bits, int length, String nextHop) {
+			this.bits = bits;
+			this.length = length;
+			this.nextHop = nextHop;
+		}
+
+		public boolean matches(int ipBits) {
+			int undesiredLength = 32 - length;
+			
+			return bits == ipBits >>> undesiredLength;
 		}
 	}
 }
