@@ -147,7 +147,7 @@ public class Trie {
 				
 				int data = toInsert.data >>> undesiredLength;
 				
-				next = new Node(data, current.level + strideLength);
+				next = new Node(data, current.level + 1);
 				
 				current.addChild(next);
 			}
@@ -259,7 +259,7 @@ public class Trie {
 		
 		public Node childContainsPrefix(Node prefix) {
 			
-			int undesiredLength = prefix.level - (level + 1);
+			int undesiredLength = prefix.level - (level * strideLength);
 			
 			int beginningPrefix = prefix.data >>> undesiredLength;
 			

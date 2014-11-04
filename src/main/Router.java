@@ -17,7 +17,7 @@ import java.util.Scanner;
 public class Router {
 	
 	// TODO: Make Dynamic for second release
-	private final int STRIDE_LENGTH = 1; 
+	private final int STRIDE_LENGTH = 2; 
 	
 	private BufferedReader routesReader;
 	
@@ -155,7 +155,7 @@ public class Router {
 			
 			int memUsage = (int) (Runtime.getRuntime().totalMemory() - 
 					Runtime.getRuntime().freeMemory());
-			memUsage /= 1048576;
+			memUsage /= 1048576; //2^20 bits
 			
 			System.out.println("Memory usage: " + memUsage + "Mb");
 			
