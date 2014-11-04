@@ -87,6 +87,8 @@ public class Router {
 			trie.add(prefix, prefixLength, shortestPath, shortestHop);
 		}
 		
+		routesReader.close();
+		
 	}
 	
 	public void lookupIPs() throws IOException {
@@ -96,10 +98,12 @@ public class Router {
 		while ((line = ipListReader.readLine()) != null) {
 			String result = trie.lookUp(line);
 			
-			String output = String.format("%-15s   %-15s", line, result);
+			String output = String.format("%-15s %-15s", line, result);
 			
 			System.out.println(output);
 		}
+		
+		ipListReader.close();
 	}
 	
 	public static void main(String[] args) {
@@ -133,7 +137,7 @@ public class Router {
 			System.exit(0);
 		}
 		
-		System.out.println("\nPress any key to populate Trie");
+		System.out.println("\nPress enter to populate Trie");
 		scan.nextLine();
 		System.out.print("...Populating... ");
 		
@@ -147,6 +151,8 @@ public class Router {
 			System.out.println("Done");
 			System.out.println("Elapsed time: " + elapsed + "ms");
 			
+			System.gc();
+			
 			int memUsage = (int) (Runtime.getRuntime().totalMemory() - 
 					Runtime.getRuntime().freeMemory());
 			memUsage /= 1048576;
@@ -158,7 +164,7 @@ public class Router {
 			System.exit(0);
 		}
 		
-		System.out.println("\nPress any key to lookup IPs");
+		System.out.println("\nPress enter to lookup IPs");
 		scan.nextLine();
 		
 		try {

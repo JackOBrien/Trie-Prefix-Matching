@@ -9,13 +9,15 @@ import java.util.Vector;
  * @author Jack O'Brien
  * @author Megan Maher
  * @author Tyler McCarthy
- * @version Nov 2, 2014
+ * @version Nov 4, 2014
  *******************************************************************/
 public class Trie {
 
+	/** The root of the Trie */
 	private Node root;
 	
-	/** Difference of the number of bits between levels. */
+	/** Difference of the number of bits between levels. 
+	 * TODO: Unused for release 1 */
 	private int strideLen;
 	
 	/****************************************************************
@@ -30,6 +32,14 @@ public class Trie {
 		this.strideLen = strideLength;
 	}
 	
+	/****************************************************************
+	 * Adds a prefix into the Trie.
+	 * 
+	 * @param prefix the IP address of the prefix.
+	 * @param prefixLength the number of bits in the prefix.
+	 * @param pathLength the length of the AS path.
+	 * @param nextHop the IP address of the next hop.
+	 ***************************************************************/
 	public void add(String prefix, int prefixLength, int pathLength, 
 			String nextHop){
 		
@@ -40,6 +50,14 @@ public class Trie {
 		insertPrefix(node);
 	}
 	
+	/****************************************************************
+	 * Looks up the given IP address and returns the next hop 
+	 * associated with it. Returns "No Match" if there is no 
+	 * matching prefix.
+	 * 
+	 * @param ipAddr the IPv4 address to lookup
+	 * @return the next hop associated with the given IP if any.
+	 ***************************************************************/
 	public String lookUp(String ipAddr) {
 		
 		int ipAddressLength = 32;
@@ -55,17 +73,15 @@ public class Trie {
 		return result;
 	}
 	
-	private int convertIPtoInt(String ipAddr, int prefixLength) {
-		String[] ipArr = ipAddr.split("\\.");
-		
-		int data = (Integer.parseInt(ipArr[0]) & 0xFF) << 24;
-		data |= (Integer.parseInt(ipArr[1]) & 0xFF) << 16;
-		data |= (Integer.parseInt(ipArr[2]) & 0xFF) << 8;
-		data |= (Integer.parseInt(ipArr[3]) & 0xFF);
-		
-		return data >>> (32 - prefixLength);
-	}
-	
+	/****************************************************************
+	 * Looks up the given IP address and returns the next hop 
+	 * associated with it. Returns "No Match" if there is no 
+	 * matching prefix.
+	 * 
+	 * @param searchingFor the node representing what is being searched for.
+	 * @param current the node currently being compared.
+	 * @return the next hop associated with the given IP if any.
+	 ***************************************************************/
 	private String lookUp(Node searchingFor, Node current) {
 		
 		/* End case */
@@ -100,10 +116,21 @@ public class Trie {
 		}
 	}
 	
+	/****************************************************************
+	 * Inserts the given prefix into the Trie.
+	 * 
+	 * @param node the node representing what's to be added.
+	 ***************************************************************/
 	private void insertPrefix(Node node) {
 		insertPrefix(node, root);
 	}
 	
+	/****************************************************************
+	 * Inserts the given prefix into the Trie.
+	 * 
+	 * @param node the node representing what's to be added.
+	 * @param current the node current;y being compared.
+	 ***************************************************************/
 	private void insertPrefix(Node toInsert, Node current) {
 		
 		if (current.data == toInsert.data) {
@@ -128,6 +155,25 @@ public class Trie {
 		}
 	}
 	
+	/****************************************************************
+	 * Converts a prefix given as a string to an integer representing
+	 * the bits of the string.
+	 * 
+	 * @param ipAddr the IP of the prefix to convert.
+	 * @param prefixLength the number of relevant bits in the prefix.
+	 * @return the prefix as an integer representing the bits.
+	 ***************************************************************/
+	private int convertIPtoInt(String ipAddr, int prefixLength) {
+		String[] ipArr = ipAddr.split("\\.");
+		
+		int data = (Integer.parseInt(ipArr[0]) & 0xFF) << 24;
+		data |= (Integer.parseInt(ipArr[1]) & 0xFF) << 16;
+		data |= (Integer.parseInt(ipArr[2]) & 0xFF) << 8;
+		data |= (Integer.parseInt(ipArr[3]) & 0xFF);
+		
+		return data >>> (32 - prefixLength);
+	}
+
 	public static void main(String[] args) {
 		Trie t = new Trie(1);
 		
