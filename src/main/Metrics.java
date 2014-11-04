@@ -12,9 +12,7 @@ public class Metrics {
 		
 		PrintStream originalStream = System.out;
 		PrintStream dummyStream    = new PrintStream(new OutputStream(){
-		    public void write(int b) {
-		        //NO-OP
-		    }
+		    public void write(int b) {}
 		});
 		
 		Scanner scan = new Scanner(System.in);
@@ -68,8 +66,13 @@ public class Metrics {
 		}
 		
 		int averageTime = (int) (totalTime / numberOfLoops);
+		long totalMemory = (Runtime.getRuntime().totalMemory() - 
+				Runtime.getRuntime().freeMemory());
+		int averageMemory = (int) (totalMemory / numberOfLoops);
+		averageMemory /= 1048576;
 		
 		System.setOut(originalStream);
-		System.out.println("Average time: " + averageTime + "ms");
+		System.out.println("\nAverage time: " + averageTime + "ms");
+		System.out.println("Average memory: " + averageMemory + "Mb");
 	}	
 }
