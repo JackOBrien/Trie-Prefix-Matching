@@ -130,33 +130,36 @@ public class Trie {
 	 ***************************************************************/
 	private void insertPrefix(Prefix toInsert, Node current) {
 		
-		int len = toInsert.length;
 		
-		while (len % strideLength != 0) {
-			len ++;
+	}
+	
+	private int[] destinationData(Prefix p, int level) {
+		
+		// Number of significant bits in the node's data field
+		int nodeLen = strideLength * level;
+		int numDests;
+		
+		if (p.length >= nodeLen) numDests = 1;
+		else {
+			double power = (double) ((nodeLen) - p.length);
+			numDests = (int) Math.pow(2.0, power);
 		}
 		
-		int desiredData = toInsert.bits << (len - toInsert.length);
+		int[] destinations = new int[numDests];
 		
-		if (current.data == desiredData && 
-				current.level * strideLength == len) {
-			current.addPrefix(toInsert);
-		} else {
-			
-			Node next = current.getNextStep(toInsert);
-			
-			/* If the current node does not have the child needed, create it */
-			if (next == null) {
-				
-				int data = shiftPrefix(toInsert, current.level);
-				
-				next = new Node(data, current.level + 1);
-				
-				current.addChild(next);
-			}
-			
-			insertPrefix(toInsert, next);
+		// Difference from prefix length to next multiple of stride length
+		int len = 0; 
+		while ((len + p.length) % strideLength != 0) len ++;
+		int data = p.bits << len;
+		
+		int unwantedLen = ((p.length + len) - nodeLen);
+		data = data >>> unwantedLen;
+		
+		for (int i = 0; numDests > 0; i++, numDests--) {
+			destinations[i] = data & i;
 		}
+		
+		return destinations;
 	}
 	
 	/****************************************************************
@@ -246,8 +249,9 @@ public class Trie {
 	
 	private class Node {
 		
-		Vector<Prefix> prefixes;
 		Vector<Node> children;
+		
+		Prefix prefix;
 		
 		int data;
 		int level;
@@ -256,30 +260,21 @@ public class Trie {
 			this.data = data;
 			this.level = level;
 			
-			prefixes = new Vector<Prefix>();
+			prefix = null;
 			children = new Vector<Node>();
 		}
 		
-		public void addPrefix(Prefix prefix) {
-			prefixes.add(prefix);
+		public void setPrefix(Prefix prefix) {
+			this.prefix = prefix;
 		}
 		
 		public void addChild(Node child) {
 			children.add(child);
 		}
 		
-		public String getBestHop(int ipBits) {			
-			Prefix longestPrefix = new Prefix(-1, 0, null);
-			
-			for (Prefix p : prefixes) {
-				if (p.length > longestPrefix.length) {
-					if (p.matches(ipBits)) {
-						longestPrefix = p;
-					}
-				}
-			}
-			
-			return longestPrefix.nextHop;
+		public String getNextHop() {			
+			if (prefix == null) return null;
+			return prefix.nextHop;
 		}
 		
 		public Node getNextStep(Prefix prefix) {
