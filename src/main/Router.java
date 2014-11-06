@@ -12,7 +12,7 @@ import java.util.Scanner;
  * @author Jack O'Brien
  * @author Megan Maher
  * @author Tyler McCarthy
- * @version Nov 3, 2014
+ * @version Nov 5, 2014
  *******************************************************************/
 public class Router {
 	

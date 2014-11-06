@@ -16,8 +16,7 @@ public class Trie {
 	/** The root of the Trie */
 	private Node root;
 	
-	/** Difference of the number of bits between levels. 
-	 * TODO: Unused for release 1 */
+	/** Difference of the number of bits between levels. */
 	private int strideLength;
 	
 	/****************************************************************
@@ -83,33 +82,28 @@ public class Trie {
 		
 		/* End case */
 		if (current.children.isEmpty()) {
-			return current.getBestHop(toLookup.bits);
+			if (current.prefix == null) return null;
+			return current.prefix.nextHop;
 		} else {	
+			int[] destArr = destinationData(toLookup, current.level + 1);
 			
-			Node next = current.getNextStep(toLookup);
-			
-			/* If the current node has a next hop IP */
-			if (current.getBestHop(toLookup.bits) != null) {
+			/* Loops through the array of destination data */
+			for (int i = 0; i < destArr.length; i++) {
+				Node next = current.getNextStep(destArr[i]);
 				
-				if (next == null) {
-					return current.getBestHop(toLookup.bits);
-				}
-				
-				String result = lookUp(toLookup, next);
-				
-				if (result == null) {
-					return current.getBestHop(toLookup.bits);
-				} else {
+				if (next != null) {
+					String result = lookUp(toLookup, next);
+					
+					if (result == null) continue;
 					return result;
 				}
 			}
+
+			if (current.prefix != null) {
+				return current.prefix.nextHop;
+			} 
 			
-			/* If the current node contains no children with the next step */
-			if (next == null) {
-				return null;
-			}		
-			
-			return lookUp(toLookup, next);
+			return null;
 		}
 	}
 	
@@ -130,7 +124,27 @@ public class Trie {
 	 ***************************************************************/
 	private void insertPrefix(Prefix toInsert, Node current) {
 		
+		// Difference between current node length and prefix length
+		int len = (current.level * strideLength) - toInsert.length;
 		
+		/* End Case. We've reached the desired level in the Trie. */
+		if (len >= 0 && len < strideLength) {
+			current.setPrefix(toInsert);
+		} else {
+			int[] destArr = destinationData(toInsert, current.level + 1);
+			
+			/* Loops through the array of destination data */
+			for (int i = 0; i < destArr.length; i++) {
+				Node next = current.getNextStep(destArr[i]);
+				
+				if (next == null) {
+					next = new Node(destArr[i], current.level + 1);
+					current.addChild(next);
+				}
+
+				insertPrefix(toInsert, next);
+			}
+		}
 	}
 	
 	private int[] destinationData(Prefix p, int level) {
@@ -156,7 +170,7 @@ public class Trie {
 		data = data >>> unwantedLen;
 		
 		for (int i = 0; numDests > 0; i++, numDests--) {
-			destinations[i] = data & i;
+			destinations[i] = data | i;
 		}
 		
 		return destinations;
@@ -179,24 +193,10 @@ public class Trie {
 		data |= (Integer.parseInt(ipArr[3]) & 0xFF);
 		
 		return data >>> (32 - prefixLength);
-	}
-
-	private int shiftPrefix(Prefix prefix, int level) {
-		int undesiredLength = prefix.length - ((level + 1) * strideLength);
-		int beginningPrefix;
-		
-		if (undesiredLength < 0) {
-			beginningPrefix = prefix.bits << (-1) * undesiredLength;
-		} else {
-			beginningPrefix = prefix.bits >>> undesiredLength;
-		}
-		
-		return beginningPrefix; 
-	}
-	
+	}	
 	
 	public static void main(String[] args) {
-		Trie t = new Trie(2);
+		Trie t = new Trie(3);
 		
 		Scanner scan = new Scanner(System.in);
 		
@@ -225,7 +225,7 @@ public class Trie {
 
 					t.add(prefix, prefixLength, nextHop);
 					
-					System.out.println("---\tAdded to Trie");
+ 					System.out.println("---\tAdded to Trie");
 				
 				} else if(input.startsWith("lookup ")) {
 					input = input.substring(7);
@@ -271,21 +271,11 @@ public class Trie {
 		public void addChild(Node child) {
 			children.add(child);
 		}
-		
-		public String getNextHop() {			
-			if (prefix == null) return null;
-			return prefix.nextHop;
-		}
-		
-		public Node getNextStep(Prefix prefix) {
-			
-			int beginningPrefix = shiftPrefix(prefix, level);
-			
+
+		public Node getNextStep(int data) {
 			for (Node child : children) {
-				
-				if (child.data == beginningPrefix) {
+				if (child.data == data)
 					return child;
-				}
 			}
 			
 			return null;
@@ -301,12 +291,6 @@ public class Trie {
 			this.bits = bits;
 			this.length = length;
 			this.nextHop = nextHop;
-		}
-
-		public boolean matches(int ipBits) {
-			int undesiredLength = 32 - length;
-			
-			return bits == ipBits >>> undesiredLength;
 		}
 	}
 }
