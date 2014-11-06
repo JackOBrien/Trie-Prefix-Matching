@@ -85,7 +85,7 @@ public class Trie {
 			if (current.prefix == null) return null;
 			return current.prefix.nextHop;
 		} else {	
-			int nodeLength = strideLength * current.level;
+			int nodeLength = strideLength * (current.level + 1);
 			int bits = toLookup.bits;
 			int pLength = toLookup.length;
 			
@@ -98,13 +98,27 @@ public class Trie {
 			bits >>>= undesiredLength;
 				
 			Node next = current.getNextStep(bits);
-			
-			if (next == null) {
-				if (current.prefix != null) {
+
+			/* If the current node has a next hop IP */
+			if (current.prefix != null) {
+				
+				if (next == null) {
 					return current.prefix.nextHop;
 				}
-				return null;
+				
+				String result = lookUp(toLookup, next);
+				
+				if (result == null) {
+					return current.prefix.nextHop;
+				} else {
+					return result;
+				}
 			}
+			
+			/* If the current node contains no children with the next step */
+			if (next == null) {
+				return null;
+			}		
 			
 			return lookUp(toLookup, next);
 		}
@@ -127,11 +141,15 @@ public class Trie {
 	 ***************************************************************/
 	private void insertPrefix(Prefix toInsert, Node current) {
 		
-		// Difference between current node length and prefix length
-		int len = (current.level * strideLength) - toInsert.length;
-		
 		/* End Case. We've reached the desired level in the Trie. */
-		if (len >= 0 && len < strideLength) {
+		if (strideLength * current.level > toInsert.length) {
+			
+			/* Doesn't change prefix if a better one is already there. */
+			if (current.prefix != null) {
+				if (current.prefix.length > toInsert.length) {
+					return;
+				}
+			}
 			current.setPrefix(toInsert);
 		} else {
 			int[] destArr = destinationData(toInsert, current.level + 1);
