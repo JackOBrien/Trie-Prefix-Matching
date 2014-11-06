@@ -85,25 +85,28 @@ public class Trie {
 			if (current.prefix == null) return null;
 			return current.prefix.nextHop;
 		} else {	
-			int[] destArr = destinationData(toLookup, current.level + 1);
+			int nodeLength = strideLength * current.level;
+			int bits = toLookup.bits;
+			int pLength = toLookup.length;
 			
-			/* Loops through the array of destination data */
-			for (int i = 0; i < destArr.length; i++) {
-				Node next = current.getNextStep(destArr[i]);
-				
-				if (next != null) {
-					String result = lookUp(toLookup, next);
-					
-					if (result == null) continue;
-					return result;
-				}
+			if (pLength < nodeLength) {
+				pLength = nodeLength;
+				bits <<= nodeLength - toLookup.length;
 			}
-
-			if (current.prefix != null) {
-				return current.prefix.nextHop;
-			} 
 			
-			return null;
+			int undesiredLength = pLength - nodeLength;
+			bits >>>= undesiredLength;
+				
+			Node next = current.getNextStep(bits);
+			
+			if (next == null) {
+				if (current.prefix != null) {
+					return current.prefix.nextHop;
+				}
+				return null;
+			}
+			
+			return lookUp(toLookup, next);
 		}
 	}
 	
