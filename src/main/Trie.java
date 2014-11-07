@@ -142,7 +142,7 @@ public class Trie {
 	private void insertPrefix(Prefix toInsert, Node current) {
 		
 		/* End Case. We've reached the desired level in the Trie. */
-		if (strideLength * current.level > toInsert.length) {
+		if (strideLength * current.level >= toInsert.length) {
 			
 			/* Doesn't change prefix if a better one is already there. */
 			if (current.prefix != null) {
