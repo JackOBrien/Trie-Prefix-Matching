@@ -50,7 +50,7 @@ public class Trie {
 	
 	/****************************************************************
 	 * Looks up the given IP address and returns the next hop 
-	 * associated with it. Returns "No Match" if there is no 
+	 * associated with it. Returns "NoMatch" if there is no 
 	 * matching prefix.
 	 * 
 	 * @param ipAddr the IPv4 address to lookup
@@ -64,7 +64,7 @@ public class Trie {
 		
 		String result = lookUp(new Prefix(data, ipAddressLength, null), root);
 		
-		if (result == null) result = "No Match";
+		if (result == null) result = "NoMatch";
 		
 		return result;
 	}

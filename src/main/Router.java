@@ -35,10 +35,10 @@ public class Router {
 	}
 	
 	public void populateTrie() throws IOException {
-		String line;
+		String line = routesReader.readLine();
 		
 		/* Reads the routes file line-by-line */
-		while ((line = routesReader.readLine()) != null) {
+		while (line != null) {
 			String[] pipes = line.split("\\|");
 			
 			if (pipes.length != 3) {
@@ -95,9 +95,10 @@ public class Router {
 		while ((line = ipListReader.readLine()) != null) {
 			String result = trie.lookUp(line);
 			
-			String output = String.format("%-15s %-15s", line, result);
+//			String output = String.format("%-15s %s", line, result);
 			
-			System.out.println(output);
+//			System.out.println(output);
+			System.out.println(line + "\t" + result);
 		}
 		
 		ipListReader.close();
