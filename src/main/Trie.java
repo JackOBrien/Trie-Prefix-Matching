@@ -188,7 +188,7 @@ public class Trie {
 		int data = p.bits << len;
 		
 		int unwantedLen = ((p.length + len) - nodeLen);
-		data = data >>> unwantedLen;
+		data >>>= unwantedLen;
 		
 		for (int i = 0; numDests > 0; i++, numDests--) {
 			destinations[i] = data | i;

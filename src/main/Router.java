@@ -95,13 +95,11 @@ public class Router {
 		while ((line = ipListReader.readLine()) != null) {
 			String result = trie.lookUp(line);
 			
-//			String output = String.format("%-15s %s", line, result);
+			String output = String.format("%-15s %s", line, result);
 			
-//			System.out.println(output);
-			System.out.println(line + "\t" + result);
+			System.out.println(output);
+//			System.out.println(line + "\t" + result); // use this for str cmpr
 		}
-		
-		ipListReader.close();
 	}
 	
 	public static void main(String[] args) {
