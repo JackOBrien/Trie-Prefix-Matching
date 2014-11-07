@@ -41,6 +41,7 @@ public class Metrics {
 	
 	private double avgBuild;
 	private double avgLookup;
+	private int avgMemory;
 	
 	public static int numLinesLookup;
 	
@@ -49,7 +50,19 @@ public class Metrics {
 		this.routes = routes;
 		this.ips = ips;
 		
+		System.gc();
+		
+		long memoryBefore =  (Runtime.getRuntime().totalMemory() - 
+				Runtime.getRuntime().freeMemory()); 
+		
 		avgBuild = avgBuildTime(runs);
+		
+		long memoryAfter = (Runtime.getRuntime().totalMemory() - 
+				Runtime.getRuntime().freeMemory());
+		memoryAfter -= memoryBefore;
+		avgMemory = (int) (memoryAfter / runs);
+		avgMemory /= 1048576;
+		
 		avgLookup = avgLookupTime();
 	}
 	
@@ -67,6 +80,18 @@ public class Metrics {
 		double avgLk = avgLookup * 1000000.0; // time in nano seconds
 		avgLk /= (double) numLinesLookup; // time in nano per IP
 		return avgLk;
+	}
+	
+	public int getAvgMemory() {
+		return avgMemory;
+	}
+	
+	public int getNumNodes() {
+		return lastUsed.getNumNodes();
+	}
+	
+	public int getNumPrefixes() {
+		return lastUsed.getNumPrefixes();
 	}
 	
 	private double avgBuildTime(int numRuns) {
@@ -115,7 +140,8 @@ public class Metrics {
 	private double avgLookupTime() {
 		
 		long totalTime = 0;
-		print("-- Calculating Lookup Time (" + LOOKUP_RUNS + " runs)");
+		print("-- Calculating Lookup Time (" + (int) LOOKUP_RUNS + " runs)");
+		
 		for (int i = 0; i < LOOKUP_RUNS; i++) {
 			long start = System.currentTimeMillis();
 			try {
@@ -192,26 +218,29 @@ public class Metrics {
 				
 		mute();
 		
-//		int averageTime = (int) (totalTime / numberOfLoops);
-//		long totalMemory = (Runtime.getRuntime().totalMemory() - 
-//				Runtime.getRuntime().freeMemory());
-//		int averageMemory = (int) (totalMemory / numberOfLoops);
-//		averageMemory /= 1048576;
-		
 		print("\nStarting Stride Length 1 Calculations");
 		Metrics m1 = new Metrics(1, numRuns, routerFile, ipFile);
 		double build1 = m1.getAvgBuildTime();
 		double lookup1 = m1.getAvgLookupTime();
+		int nodes1 = m1.getNumNodes();
+		int prefixes1 = m1.getNumPrefixes();
+		int mem1 = m1.avgMemory;
 		
 		print("\nStarting Stride Length 2 Calculations");
 		Metrics m2 = new Metrics(2, numRuns, routerFile, ipFile);
 		double build2 = m2.getAvgBuildTime();
 		double lookup2 = m2.getAvgLookupTime();
+		int nodes2 = m2.getNumNodes();
+		int prefixes2 = m2.getNumPrefixes();
+		int mem2 = m2.avgMemory;
 		
 		print("\nStarting Stride Length 3 Calculations");
 		Metrics m3 = new Metrics(3, numRuns, routerFile, ipFile);
 		double build3 = m3.getAvgBuildTime();
 		double lookup3 = m3.getAvgLookupTime();
+		int nodes3 = m3.getNumNodes();
+		int prefixes3 = m3.getNumPrefixes();
+		int mem3 = m3.avgMemory;
 		
 		unmute();
 		
@@ -225,11 +254,17 @@ public class Metrics {
 				"Build Time", build1, build2, build3, "sec");
 		String lookup = String.format("%16s | %7.4f %7.4f %7.4f %-7s", 
 				"Search Time", lookup1, lookup2, lookup3, "ns");
+		String nodes = String.format("%16s | %7s %7s %7s %-7s", 
+				"Num Nodes", nodes1, nodes2, nodes3, "nodes");
+		String prefixes = String.format("%16s | %7s %7s %7s %-7s", 
+				"Num Prefixes", prefixes1, prefixes2, prefixes3, "prefixes");
 		String memory = String.format("%16s | %7s %7s %7s %-7s", 
-				"Memory Usage",	"---", "---", "---", "Mb");
+				"Memory Usage",	mem1, mem2, mem3, "Mb");
 		
 		System.out.println(build);
 		System.out.println(lookup);
+		System.out.println(nodes);
+		System.out.println(prefixes);
 		System.out.println(memory);
 	}	
 }

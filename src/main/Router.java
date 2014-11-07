@@ -102,6 +102,14 @@ public class Router {
 		}
 	}
 	
+	public int getNumNodes() {
+		return trie.getNumNodes();
+	}
+	
+	public int getNumPrefixes() {
+		return trie.getNumPrefixes();
+	}
+	
 	public static void main(String[] args) {
 		Scanner scan = new Scanner(System.in);		
 		

@@ -19,6 +19,9 @@ public class Trie {
 	/** Difference of the number of bits between levels. */
 	private int strideLength;
 	
+	private int numNodes;
+	private int numPrefixes;
+	
 	/****************************************************************
 	 * Default constructor 
 	 * 
@@ -67,6 +70,14 @@ public class Trie {
 		if (result == null) result = "NoMatch";
 		
 		return result;
+	}
+	
+	public int getNumNodes() {
+		return numNodes;
+	}
+	
+	public int getNumPrefixes() {
+		return numPrefixes;
 	}
 	
 	/****************************************************************
@@ -150,6 +161,7 @@ public class Trie {
 					return;
 				}
 			}
+			if (current.prefix == null) numPrefixes ++;
 			current.setPrefix(toInsert);
 		} else {
 			int[] destArr = destinationData(toInsert, current.level + 1);
@@ -161,6 +173,7 @@ public class Trie {
 				if (next == null) {
 					next = new Node(destArr[i], current.level + 1);
 					current.addChild(next);
+					numNodes++;
 				}
 
 				insertPrefix(toInsert, next);
