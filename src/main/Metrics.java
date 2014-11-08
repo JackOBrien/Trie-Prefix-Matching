@@ -43,12 +43,19 @@ public class Metrics {
 	private double avgLookup;
 	private int avgMemory;
 	
+	private int numRuns;
+	
+	private long[] buildTimes;
+	
 	public static int numLinesLookup;
 	
 	public Metrics(int strideLength, int runs, String routes, String ips) {
 		this.strideLength = strideLength;
+		numRuns = runs;
 		this.routes = routes;
 		this.ips = ips;
+		
+		buildTimes = new long[runs];
 		
 		System.gc();
 		
@@ -64,6 +71,16 @@ public class Metrics {
 		avgMemory /= 1048576;
 		
 		avgLookup = avgLookupTime();
+	}
+	
+	public double getStdDevBuildTime() {
+		long sum = 0;
+		for (int i = 0; i < buildTimes.length; i++) {
+			sum += ((buildTimes[i] - avgBuild) * (buildTimes[i] - avgBuild));
+		}
+		
+		double stdDev = Math.sqrt((1.0/((double)numRuns))*((double)sum));
+		return stdDev;
 	}
 	
 	/****************************************************************
@@ -125,8 +142,11 @@ public class Metrics {
 				unmute();
 				e.printStackTrace();
 			}
-
-			totalTime += (System.currentTimeMillis() - start);
+			long elapsedTime = (System.currentTimeMillis() - start);
+			totalTime += elapsedTime;
+			
+			buildTimes[i] = elapsedTime;
+			
 			print("-- Build " + (i + 1) + " complete");
 		}
 		lastUsed = router;
@@ -225,6 +245,7 @@ public class Metrics {
 		int nodes1 = m1.getNumNodes();
 		int prefixes1 = m1.getNumPrefixes();
 		int mem1 = m1.avgMemory;
+		print("Std dev: " + Double.toString(m1.getStdDevBuildTime()));
 		
 		print("\nStarting Stride Length 2 Calculations");
 		Metrics m2 = new Metrics(2, numRuns, routerFile, ipFile);
@@ -233,6 +254,7 @@ public class Metrics {
 		int nodes2 = m2.getNumNodes();
 		int prefixes2 = m2.getNumPrefixes();
 		int mem2 = m2.avgMemory;
+		print("Std dev: " + Double.toString(m2.getStdDevBuildTime()));
 		
 		print("\nStarting Stride Length 3 Calculations");
 		Metrics m3 = new Metrics(3, numRuns, routerFile, ipFile);
@@ -241,6 +263,7 @@ public class Metrics {
 		int nodes3 = m3.getNumNodes();
 		int prefixes3 = m3.getNumPrefixes();
 		int mem3 = m3.avgMemory;
+		print("Std dev: " + Double.toString(m3.getStdDevBuildTime()));
 		
 		unmute();
 		
