@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.util.Scanner;
 
 /********************************************************************
- * Router.java
+ * Reads the two input files, builds the Trie and prints the 
+ * results from the look up.
  *
  * @author Jack O'Brien
  * @author Megan Maher

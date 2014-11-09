@@ -245,7 +245,7 @@ public class Metrics {
 		int nodes1 = m1.getNumNodes();
 		int prefixes1 = m1.getNumPrefixes();
 		int mem1 = m1.avgMemory;
-		print("Std dev: " + Double.toString(m1.getStdDevBuildTime()));
+//		print("Std dev: " + Double.toString(m1.getStdDevBuildTime()));
 		
 		print("\nStarting Stride Length 2 Calculations");
 		Metrics m2 = new Metrics(2, numRuns, routerFile, ipFile);
@@ -254,7 +254,7 @@ public class Metrics {
 		int nodes2 = m2.getNumNodes();
 		int prefixes2 = m2.getNumPrefixes();
 		int mem2 = m2.avgMemory;
-		print("Std dev: " + Double.toString(m2.getStdDevBuildTime()));
+//		print("Std dev: " + Double.toString(m2.getStdDevBuildTime()));
 		
 		print("\nStarting Stride Length 3 Calculations");
 		Metrics m3 = new Metrics(3, numRuns, routerFile, ipFile);
@@ -263,7 +263,7 @@ public class Metrics {
 		int nodes3 = m3.getNumNodes();
 		int prefixes3 = m3.getNumPrefixes();
 		int mem3 = m3.avgMemory;
-		print("Std dev: " + Double.toString(m3.getStdDevBuildTime()));
+//		print("Std dev: " + Double.toString(m3.getStdDevBuildTime()));
 		
 		unmute();
 		
