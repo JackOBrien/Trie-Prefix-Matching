@@ -9,6 +9,14 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
+/********************************************************************
+ * Calculates various metrics for each stride length 1-3
+ *
+ * @author Jack O'Brien
+ * @author Megan Maher
+ * @author Tyler McCarthy
+ * @version Nov 5, 2014
+ *******************************************************************/
 public class Metrics {
 	
 	static PrintStream dummyStream = new PrintStream(new OutputStream(){
