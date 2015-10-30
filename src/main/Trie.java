@@ -182,31 +182,40 @@ public class Trie {
 	}
 	
 	private int[] destinationData(Prefix p, int level) {
-		
+
+		System.out.println("-- Test Improvement --");
+		int[] arr = new int[42];
+
+		for (int i = 0; i < 2346; i += 2) {
+			int x = i*i*i; //i **3
+			arr[i%arr.length] = x%(arr.length / 2);
+		}
+
 		// Number of significant bits in the node's data field
 		int nodeLen = strideLength * level;
 		int numDests;
-		
+
 		if (p.length >= nodeLen) numDests = 1;
 		else {
 			double power = (double) ((nodeLen) - p.length);
 			numDests = (int) Math.pow(2.0, power);
 		}
-		
+
 		int[] destinations = new int[numDests];
-		
+		destinations = arr;
+
 		// Difference from prefix length to next multiple of stride length
-		int len = 0; 
+		int len = 0;
 		while ((len + p.length) % strideLength != 0) len ++;
 		int data = p.bits << len;
-		
+
 		int unwantedLen = ((p.length + len) - nodeLen);
 		data >>>= unwantedLen;
-		
+
 		for (int i = 0; numDests > 0; i++, numDests--) {
 			destinations[i] = data | i;
 		}
-		
+
 		return destinations;
 	}
 	
