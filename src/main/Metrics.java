@@ -80,7 +80,10 @@ public class Metrics {
 		
 		avgLookup = avgLookupTime();
 	}
-	
+
+	/****************************************************************
+	 * Unused in this build. Calls are commented.
+	 ***************************************************************/
 	public double getStdDevBuildTime() {
 		long sum = 0;
 		for (int i = 0; i < buildTimes.length; i++) {
