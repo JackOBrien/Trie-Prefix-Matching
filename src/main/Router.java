@@ -99,7 +99,6 @@ public class Router {
 			String output = String.format("%-15s %s", line, result);
 			
 			System.out.println(output);
-//			System.out.println(line + "\t" + result); // use this for str cmpr
 		}
 	}
 	
